@@ -1,0 +1,5 @@
+﻿  main.cpp
+D:\Coding\Networking\Socket\Socket.h(46,4): warning C4091: 'virtual ': ignored on left of 'Socket::packet' when no variable is declared
+  (compiling source file 'main.cpp')
+  
+  Neworking.vcxproj -> D:\Coding\Networking\bin\Debug-windows-x86_64\Neworking\Neworking.exe
