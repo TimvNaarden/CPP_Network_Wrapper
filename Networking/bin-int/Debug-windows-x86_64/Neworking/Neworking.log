@@ -1,7 +1,0 @@
-﻿  Socket.cpp
-  main.cpp
-D:\Coding\C++ Winsock2 Wrapper\Networking\Socket\Socket.cpp(80,8): warning C4858: discarding return value: The result of 'std::async' should be stored in a variable. If the return value is discarded, the temporary 'std::future' is destroyed, waiting for an async result or evaluating a deferred result, thus defeating the purpose of 'std::async'.
-D:\Coding\C++ Winsock2 Wrapper\Networking\Socket\Socket.cpp(97,28): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-D:\Coding\C++ Winsock2 Wrapper\Networking\Socket\Socket.cpp(150,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\Coding\C++ Winsock2 Wrapper\Networking\Socket\Socket.cpp(188,32): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  Neworking.vcxproj -> D:\Coding\C++ Winsock2 Wrapper\Networking\bin\Debug-windows-x86_64\Neworking\Neworking.exe

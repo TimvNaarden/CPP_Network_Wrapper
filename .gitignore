@@ -1,4 +1,8 @@
 .vs/*
 */.vs/*
+
 *.crt
 *.key
+
+*/*.crt
+*/*.key
