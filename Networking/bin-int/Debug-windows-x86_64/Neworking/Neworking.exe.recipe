@@ -2,7 +2,7 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\Coding\Networking\bin\Debug-windows-x86_64\Neworking\Neworking.exe</FullPath>
+      <FullPath>D:\Coding\C++ Winsock2 Wrapper\Networking\bin\Debug-windows-x86_64\Neworking\Neworking.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

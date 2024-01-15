@@ -1,39 +1,50 @@
-#include "Socket.h"
+﻿#include "Socket.h"
 
 Socket::Socket()
 {
 	// Init vars
-	m_stoplisten = 0;
-	m_socket = INVALID_SOCKET;
-	m_type = TCP;
+	m_StopListen = 0;
+	m_Socket = INVALID_SOCKET;
+	m_Type = TCP;
 
 	// Init winsock
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) 
-    {
-        std::cerr << "WSAStartup failed.\n";
-        return;
-    }
+	WSADATA wsaData;
+	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+	{
+		std::cerr << "WSAStartup failed.\n";
+		return;
+	}
 }
 
 Socket::~Socket()
 {
-	m_stoplisten = 1; 
-	closesocket(m_socket);
+	m_StopListen = 1;
+	closesocket(m_Socket);
 	WSACleanup();
-	std::terminate();
 }
 
-int Socket::Listen()
+int Socket::Listen(SOCKET clientSocket)
 {
-	// Do smh here using recv() and send() functions
+	// Default implementation prints the received packet
+	char* result = ReceivePacket(clientSocket);
+	if (result == nullptr)
+	{
+		return 0;
+	}
+	else if (result == "Con Closed")
+	{
+		return 1;
+	}
+
+	std::cout << result << std::endl;
+	free(result);
+
 	// return 1 to break the loop
-	return 1;
+	return 0;
 }
 
 void Socket::handleClient(SOCKET clientSocket)
 {
-	std::cout << "Client connected.\n";
 	if (!AcceptConnection())
 	{
 		closesocket(clientSocket);
@@ -42,38 +53,40 @@ void Socket::handleClient(SOCKET clientSocket)
 
 	while (true)
 	{
-		if (Listen())
+		if (Listen(clientSocket))
 		{
 			break;
+			
 		}
 	}
+	closesocket(clientSocket);
 
 }
 
 int Socket::AcceptConnection()
 {
-	return 0;
+	return 1;
 }
 
 void Socket::HandleServerSocket()
 {
-	std::cout << "Waiting for clients...\n";
-	while (!m_stoplisten)
+	while (!m_StopListen)
 	{
-		SOCKET clientSocket = accept(m_socket, NULL, NULL);
+		SOCKET clientSocket = accept(m_Socket, NULL, NULL);
 		if (clientSocket == INVALID_SOCKET) {
 			continue;
 		}
+		handleClient(clientSocket);
 		std::async(std::launch::async, &Socket::handleClient, this, clientSocket);
 	}
 }
 
 int Socket::Create(internetProtocol iprotocol, IPPROTO protocol, socketType type, int port, communicationType ctype, char* ip)
 {
-	m_type = type;
-	m_socket = socket(iprotocol, type, protocol);
-    if (m_socket == INVALID_SOCKET)
-    {
+	m_Type = type;
+	m_Socket = socket(iprotocol, type, protocol);
+	if (m_Socket == INVALID_SOCKET)
+	{
 		std::cerr << "Error at socket(): " << WSAGetLastError() << std::endl;
 		WSACleanup();
 		return 1;
@@ -86,52 +99,109 @@ int Socket::Create(internetProtocol iprotocol, IPPROTO protocol, socketType type
 
 	if (type == UDP || ctype == SERVER)
 	{
-		if (bind(m_socket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
+		if (bind(m_Socket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 		{
 			std::cerr << "bind() failed.\n";
-			closesocket(m_socket);
+			closesocket(m_Socket);
 			return 1;
 		}
 
-		if (listen(m_socket, 1) == SOCKET_ERROR)
+		if (listen(m_Socket, 1) == SOCKET_ERROR)
 		{
 			std::cerr << "Error listening on socket.\n";
-			closesocket(m_socket);
+			closesocket(m_Socket);
 			return 1;
 		}
 	}
 
 	if (ctype == CLIENT)
 	{
-		if (connect(m_socket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
+		if (connect(m_Socket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 		{
 			std::cerr << "Failed to connect.\n";
-			closesocket(m_socket);
+			closesocket(m_Socket);
 			return 1;
 		}
 	}
 
 	return 0;
-}	
-
-int Socket::SendPacket(packet* packet)
+}
+int Socket::SendPacket(char* packet, SOCKET dest)
 {
-	int result = send(m_socket, (char*)packet, sizeof(packet), 0);
+	if (!dest) dest = m_Socket;
+
+	size_t size = strlen(packet);
+	std::string stringSize = std::to_string(size + 1);
+
+	int result;
+
+	result = send(dest, stringSize.c_str(), 64, 0);
 	if (result == SOCKET_ERROR)
 	{
-		std::cerr << "send failed: " << WSAGetLastError() << std::endl;
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return 2;
+		}
+		std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
 		return 1;
 	}
+
+	result = send(dest, packet, size + 1, 0);
+	if (result == SOCKET_ERROR)
+	{
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return 2;
+		}
+		std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
+		return 1;
+	}
+
+
+
 	return 0;
 }
 
-int Socket::ReceivePacket(packet* packet)
+char* Socket::ReceivePacket(SOCKET source)
 {
-	int result = recv(m_socket, (char*)packet, sizeof(packet), 0);
+	size_t size = 65536;
+	char* stringSize = (char*)malloc(64);
+
+	int result;
+
+	result = recv(source, (char*)stringSize, 64, 0);
 	if (result == SOCKET_ERROR)
 	{
-		std::cerr << "recv failed: " << WSAGetLastError() << std::endl;
-		return 1;
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return "Con Closed";
+		}
+		std::cerr << "recv size failed: " << WSAGetLastError() << std::endl;
+		return nullptr;
 	}
-	return 0;
+	size = atoi(stringSize);
+	char* packet = new char[size];
+
+	result = recv(source, packet, size, 0);
+	if (result == SOCKET_ERROR)
+	{
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return "Con Closed";
+		}
+		std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
+		return nullptr;
+	}
+	// Free memory
+	free(stringSize);
+
+	if (packet[0] == -3) {
+		std::cerr << "Connection closed." << std::endl;
+		return "Con Closed";
+	}
+	return packet;
 }
