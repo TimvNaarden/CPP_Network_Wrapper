@@ -3,7 +3,14 @@
 #include <future>
 
 #include <winsock2.h>
+
 #pragma comment(lib, "ws2_32.lib")
+
+#include "openssl/ssl.h"
+#include "openssl/err.h"
+
+#pragma comment(lib, "libssl.lib")
+
 
 namespace Networking
 {
@@ -41,12 +48,17 @@ class Socket
 		// Returns 0 if successful
 		// If making a client socket, specify ip address
 		// After creating call the appropriate function to handle the socket
-		int Create(internetProtocol iprotocol, IPPROTO protocol, socketType type, int port, communicationType ctype, char* ip = "127.0.0.1");
+		// Last input true for TLS
+		int Create(internetProtocol iprotocol, int protocol, socketType type, int port, communicationType ctype, char* ip = "127.0.0.1", int tls = 0);
 
 		// This function will wait for incoming connections
 		// It will be called in a loop until m_stoplisten is set to 1
 		// Default implementation will accept incoming clients and call the handleClient() function in a new thread
 		virtual void HandleServerSocket();
+
+		// Call this function to encrypt the socket 
+		// Return 0 if successful
+		virtual int Socket::EncryptSocket();
 
 		// Send a packet
 		// Do not specify a destination if using TCP client
@@ -77,5 +89,6 @@ class Socket
 		int m_StopListen = 1;
 		socketType m_Type;
 		SOCKET m_Socket;
+		SSL_CTX* m_sslctx; 
 };
 

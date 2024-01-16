@@ -1,11 +1,14 @@
 #include "Socket.h"
 
+
+
 Socket::Socket()
 {
 	// Init vars
 	m_StopListen = 0;
 	m_Socket = INVALID_SOCKET;
 	m_Type = TCP;
+	m_sslctx = nullptr;
 
 	// Init winsock
 	WSADATA wsaData;
@@ -81,7 +84,7 @@ void Socket::HandleServerSocket()
 	}
 }
 
-int Socket::Create(internetProtocol iprotocol, IPPROTO protocol, socketType type, int port, communicationType ctype, char* ip)
+int Socket::Create(internetProtocol iprotocol, int protocol, socketType type, int port, communicationType ctype, char* ip, int tls)
 {
 	m_Type = type;
 	m_Socket = socket(iprotocol, type, protocol);
@@ -124,8 +127,39 @@ int Socket::Create(internetProtocol iprotocol, IPPROTO protocol, socketType type
 		}
 	}
 
+	if (tls)
+	{
+		return EncryptSocket();
+	}
+
 	return 0;
 }
+
+int Socket::EncryptSocket()
+{
+	const SSL_METHOD* method;
+
+	method = TLS_server_method();
+
+	m_sslctx = SSL_CTX_new(method);
+	if (!m_sslctx) {
+		std::cerr << "Unable to create SSL context" << std::endl;
+		return 1;
+	}
+
+	/* Set the key and cert */
+	if (SSL_CTX_use_certificate_file(m_sslctx, "OpenSSL/cert.pem", SSL_FILETYPE_PEM) <= 0) {
+		std::cerr << "Could not load cert" << std::endl;
+		return 1;
+	}
+
+	if (SSL_CTX_use_PrivateKey_file(m_sslctx, "OpenSSL/key.pem", SSL_FILETYPE_PEM) <= 0) {
+		std::cerr << "Could not load key" << std::endl;
+		return 1;
+	}
+	return 0;
+}		
+
 int Socket::SendPacket(char* packet, SOCKET dest)
 {
 	if (!dest) dest = m_Socket;

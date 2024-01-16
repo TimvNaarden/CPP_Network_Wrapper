@@ -50,8 +50,14 @@ project "Neworking"
     includedirs
     {
         "src",
+        "C:/MinGW/openssl/include"
 
     }
+
+    libdirs
+	{
+		"C:/MinGW/openssl/lib"
+	}
 
     links
     {
