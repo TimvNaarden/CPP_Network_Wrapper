@@ -18,11 +18,15 @@ This can be done like so:
 
 ### Server:
 > openssl genpkey -algorithm RSA -out server.key
+
 > openssl req -new -key server.key -out server.csr
+
 > openssl x509 -req -in server.csr -signkey server.key -out server.crt
 
 ### Client:
 > openssl genpkey -algorithm RSA -out client.key
+
 > openssl req -new -key client.key -out client.csr
+
 > openssl x509 -req -in client.csr -signkey client.key -out client.crt
 
