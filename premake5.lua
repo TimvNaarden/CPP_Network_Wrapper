@@ -1,3 +1,5 @@
+-- toolset "clang"
+
 workspace "Networking"
     architecture "x86_64"
     startproject "Networking"
@@ -14,7 +16,7 @@ workspace "Networking"
         "MultiProcessorCompile"
     }
 
--- The output directory based on the configurations
+-- The output directory based on the configurations"C:/MSVC/VC/Tools/MSVC/14.38.33130/lib/x64",
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 IncludeDir = {}
@@ -26,7 +28,7 @@ filter {}
 group "Dependencies"
 group "" -- End the solution folder here
 
-project "Neworking"
+project "Networking"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
@@ -38,25 +40,25 @@ project "Neworking"
 
     files
     {
-        "src/**.h",
-        "src/**.cpp",
+        "socket/**.h",
+        "socket/**.cpp",
+        "main.cpp"
     }
 
-    defines
-    {
-
-    }
- 
     includedirs
     {
-        "src",
-        "C:/MinGW/openssl/include"
+        "Socket",
+        "libs",
+        "C:/MinGW/openssl/include",
+
 
     }
 
     libdirs
 	{
-		"C:/MinGW/openssl/lib"
+		"C:/MinGW/openssl/lib",
+        "libs/OpenSSL"
+
 	}
 
     links
@@ -66,10 +68,18 @@ project "Neworking"
 
     filter "system:windows"
         systemversion "latest"
-
+        -- prebuildcommands { "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat" }
         defines
         {
             "PLATFORM_WINDOWS"
+        }
+    
+    filter "system:linux"
+        systemversion "latest"
+
+        defines
+        {   
+            "PLATFORM_LINUX"
         }
 
     filter "configurations:Debug"

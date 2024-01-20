@@ -2,9 +2,9 @@
 */.vs/*
 
 *.crt
-*.key
-
 */*.crt
+
+*.key
 */*.key
 
 *.pem
