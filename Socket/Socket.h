@@ -66,10 +66,16 @@ class Socket
 
 		// Send a packet
 		// Do not specify a destination if using TCP client or server
+		// Returns -1 if connection is closed
+		// Returns 0 if successful
+		// Returns 1 if failed
 		virtual int SendPacket(char* packet, SOCKET dest = 0, SOCKADDR* destaddr = {});
 
 		// Receive a packet
 		// Delete the packet after
+		// Returns "Con Closed " if connection is closed
+		// Returns Nullptr if failed
+		// Returns the packet if successful
 		virtual char* ReceivePacket(SOCKET source = 0);
 		
 

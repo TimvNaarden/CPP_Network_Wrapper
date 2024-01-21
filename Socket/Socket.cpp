@@ -225,7 +225,7 @@ int Socket::Send(char* packet, SOCKET dest)
 		if (result == -1)
 		{
 			std::cerr << "Connection closed." << std::endl;
-			return 2;
+			return -1;
 		}
 		std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
 		return 1;
@@ -237,7 +237,7 @@ int Socket::Send(char* packet, SOCKET dest)
 		if (result == -1)
 		{
 			std::cerr << "Connection closed." << std::endl;
-			return 2;
+			return -1;
 		}
 		std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
 		return 1;
@@ -270,7 +270,7 @@ int Socket::SendSSL(char* packet, SOCKET dest) {
 		if (result == -1)
 		{
 			std::cerr << "Connection closed." << std::endl;
-			return 2;
+			return -1;
 		}
 		std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
 		return 1;
@@ -291,7 +291,7 @@ int Socket::SendUDP(char* packet, SOCKADDR* destaddr)
 		if (result == -1)
 		{
 			std::cerr << "Connection closed." << std::endl;
-			return 2;
+			return -1;
 		}
 		std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
 		return 1;
@@ -303,7 +303,7 @@ int Socket::SendUDP(char* packet, SOCKADDR* destaddr)
 		if (result == -1)
 		{
 			std::cerr << "Connection closed." << std::endl;
-			return 2;
+			return -1;
 		}
 		std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
 		return 1;
