@@ -44,8 +44,9 @@ void Socket::HandleServerSocket()
 
 	while (!m_StopListen)
 	{
-		sockaddr_in addr;
+		sockaddr_in addr{};
 		int addrlen = sizeof(addr);
+
 		SOCKET clientSocket = accept(m_Socket, (struct sockaddr*)&addr, &addrlen);
 		if (clientSocket == INVALID_SOCKET) {
 			continue;
@@ -55,7 +56,7 @@ void Socket::HandleServerSocket()
 			BIO* sbio = BIO_new_socket(clientSocket, BIO_NOCLOSE);
 			SSL_set_bio(m_ssl, sbio, sbio);
 
-			int ret = SSL_connect(m_ssl);
+			int ret = SSL_accept(m_ssl);
 			if (ret <= 0) {
 				SERVERCMD("Failed to accept SSL");
 				SERVERCMD(SSL_get_error(m_ssl, ret));
@@ -103,7 +104,7 @@ int Socket::Listen(SOCKET clientSocket)
 
 	SERVERCMD(result);
 
-	delete result;
+	free(result);
 
 	// return 1 to break the loop
 	return 0;
@@ -380,7 +381,7 @@ char* Socket::ReceiveSSL(SOCKET source) {
 		return "Con Closed";
 	}
 	size = atoi(stringSize);
-	char* packet = new char(size);
+	char* packet = (char*) malloc(size);
 
 	result = SSL_read(m_ssl, packet, size);
 	if (result == SOCKET_ERROR)

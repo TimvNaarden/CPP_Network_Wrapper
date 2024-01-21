@@ -1,12 +1,3 @@
-﻿  Socket.cpp
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(55,31): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(176,31): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(141,28): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(234,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(267,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(300,41): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(340,32): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(383,25): warning C4267: 'initializing': conversion from 'size_t' to 'char', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(385,35): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(433,36): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+﻿  main.cpp
+D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\main.cpp(37,26): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
   Networking.vcxproj -> D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\bin\Debug-windows-x86_64\Networking\Networking.exe

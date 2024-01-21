@@ -35,7 +35,7 @@ static int Client() {
 		dest.sin_family = AF_INET;
 		dest.sin_port = htons(54000);
 		dest.sin_addr.s_addr = inet_addr("127.0.0.1");
-		int result = client.SendPacket("Hello World",0, (SOCKADDR *) & dest);
+		int result = client.SendPacket("Hello World", 0, (SOCKADDR*)&dest);
 
 		if (result == -1) {
 			CLIENTCMD("Connection Closed");

@@ -1,10 +1,10 @@
 #include "Socket/Socket.h"
 
-// Samle Server Configuration for udp
+// Samle Server Configuration for tcp
 static int Server()
 {
 	Socket server;
-	if (server.Create(IPV4, UDP, SERVER, 54000))
+	if (server.Create(IPV4, TCP, SERVER, 54000, "127.0.0.1", true))
 	{
 		return 1;
 	}
@@ -15,11 +15,11 @@ static int Server()
 
 }
 
-//Sample Client Configuration for udp
+//Sample Client Configuration for tcp
 static int Client() {
 	Socket client;
 
-	if (client.Create(IPV4, UDP, CLIENT))
+	if (client.Create(IPV4, TCP, CLIENT, 54000, "127.0.0.1", true))
 	{
 		CLIENTCMD("Failed to create socket!");
 		return 1;
@@ -31,11 +31,7 @@ static int Client() {
 
 	while (true)
 	{
-		SOCKADDR_IN dest;
-		dest.sin_family = AF_INET;
-		dest.sin_port = htons(54000);
-		dest.sin_addr.s_addr = inet_addr("127.0.0.1");
-		int result = client.SendPacket("Hello World",0, (SOCKADDR *) & dest);
+		int result = client.SendPacket("Hello World");
 
 		if (result == -1) {
 			CLIENTCMD("Connection Closed");
