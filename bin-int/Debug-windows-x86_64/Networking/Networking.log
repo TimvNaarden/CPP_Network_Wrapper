@@ -1,6 +1,4 @@
-﻿  main.cpp
-  Socket.cpp
-D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\main.cpp(37,26): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+﻿  Socket.cpp
 D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(55,31): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
 D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(176,31): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
 D:\OneDrive\Coding\C++\C++ Winsock2 Wrapper\Networking\socket\Socket.cpp(141,28): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings

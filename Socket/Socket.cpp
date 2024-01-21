@@ -190,7 +190,7 @@ int Socket::Create(internetProtocol iprotocol, socketType type, communicationTyp
 int Socket::SendPacket(char* packet, SOCKET dest, SOCKADDR* destaddr)
 {
 
-	if (m_Type = UDP) {
+	if (m_Type == UDP) {
 		if (!destaddr) {
 			std::cerr << "No destination address" << std::endl;
 			return 1;
