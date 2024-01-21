@@ -16,6 +16,8 @@
 #define SERVERCMD(x) std::cout << "Server: " << x << std::endl;
 #define CLIENTCMD(x) std::cout << "Client: " << x << std::endl;
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 enum socketType
 {
 	TCP = SOCK_STREAM,
@@ -42,10 +44,14 @@ class Socket
 
 		// Creates a socket
 		// Returns 0 if successful
-		// If making a client socket, specify ip address
 		// After creating call the appropriate function to handle the socket
-		// Last input true for TLS
-		virtual int Create(internetProtocol iprotocol, int protocol, socketType type, int port, communicationType ctype, char* ip = "127.0.0.1", int tls = 0);
+		virtual int Create(internetProtocol iprotocol,				// IPV4 or IPV6
+										socketType type,			// TCP or UDP
+										communicationType ctype,	// Client or Server
+										int port = 0,				// If using TCP or UDP server specify port 
+										char* ip = "127.0.0.1",		// Specify ip for servers to bind or tcp client to connect to 
+										int SSLEncryption = false	// Enable SSL encryption	
+							);
 
 		// This function will wait for incoming connections
 		// It will be called in a loop until m_stoplisten is set to 1
@@ -53,16 +59,18 @@ class Socket
 		virtual void HandleServerSocket();
 
 		// Optional function to accept connection
-		// Will return 0 if not altered 
-		// To refuse the connection return 1
+		// Will return 1 if not altered 
+		// To refuse the connection return 0
+		// TCP server only
 		virtual int AcceptConnection();
 
 		// Send a packet
 		// Do not specify a destination if using TCP client or server
-		virtual int SendPacket(char* packet, SOCKET dest = 0);
+		virtual int SendPacket(char* packet, SOCKET dest = 0, SOCKADDR* destaddr = {});
 
 		// Receive a packet
-		virtual char* ReceivePacket(SOCKET source);
+		// Delete the packet after
+		virtual char* ReceivePacket(SOCKET source = 0);
 		
 
 	// These functions here, are not ment to be changed
@@ -85,11 +93,13 @@ class Socket
 
 		// Send and receive functions
 		virtual int Send(char* packet, SOCKET dest);
+		virtual int SendUDP(char* packet, SOCKADDR* destaddr);
 		virtual int SendSSL(char* packet, SOCKET dest);
 
 		virtual char* Receive(SOCKET source);
 		virtual char* ReceiveSSL(SOCKET source);
-
+		virtual char* ReceiveUDP(SOCKET source);
+		
 		// SSL functions
 		int EncryptSocket();
 		int CreateSSLContext();

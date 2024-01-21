@@ -1,21 +1,43 @@
 #include "Socket/Socket.h"
 
-int Sample()
+// Samle Server Configuration
+static int Server()
 {
+	Socket server;
+	if (server.Create(IPV4, IPPROTO_UDP, UDP, 54000, SERVER, "127.0.0.1", true))
+	{
+		return 1;
+	}
+
+	server.HandleServerSocket();
+
+	return 0;
+
+}
+
+//Sample Client Configuration
+static int Client() {
 	Socket client;
 
-	if (client.Create(IPV4, IPPROTO_TCP, TCP, 54000, CLIENT, "127.0.0.1", true))
+	if (client.Create(IPV4, IPPROTO_UDP, UDP, 54000, CLIENT, "127.0.0.1", true))
 	{
 		CLIENTCMD("Failed to create socket!");
 		return 1;
 	}
 	else
 	{
-		std::cout << "Client: Connected!" << std::endl;
+		CLIENTCMD("Connected");
 	}
 
-	while (true) {
-		int result = client.SendPacket("Hello World");
+	while (true) 
+	{
+		SOCKADDR_IN dest;
+		dest.sin_family = AF_INET;
+		dest.sin_port = htons(54000);
+		dest.sin_addr.s_addr = inet_addr("127.0.0.1");
+		int result = client.SendPacket("Hello World", 0,(SOCKADDR*) & dest);
+		
+		
 		if (result == -1) {
 			return 1;
 		}
@@ -23,29 +45,23 @@ int Sample()
 		{
 			CLIENTCMD("Failed to send packet!");
 			continue;
+		} else if (result == 2)
+		{
+			CLIENTCMD("Connection Closed");
+			continue;
 		}
 		else
 		{
 			CLIENTCMD("Packet sent!");
 		}
 	}
-
-	return 0;
-
 }
-
-// Samle Server Configuration
-int Server()
+int main()
 {
-	Socket server;
-	if (server.Create(IPV4, IPPROTO_TCP, TCP, 54000, SERVER, "127.0.0.1", true))
-	{
-		return 1;
-	}
+	std::thread serverThread(Server);
+	serverThread.detach();
+	//Server();
+	return Client();
 
-	// Default implementation will accept incoming clients and call the handleClient() function in a new thread
-	// Which will than wait for packets and print them to the console, like this: Server: {Mesag}
-	server.HandleServerSocket();
-
-	return 0;
 }
+

@@ -34,56 +34,14 @@ Socket::~Socket()
 	}
 }
 
-int Socket::Listen(SOCKET clientSocket)
-{
-	// Default implementation prints the received packet
-	char* result = ReceivePacket(clientSocket);
-	if (result == nullptr)
-	{
-		return 0;
-	}
-	else if (result == "Con Closed")
-	{
-		SERVERCMD("Connection closed");
-		return 1;
-	}
-
-	SERVERCMD(result);
-
-	delete result;
-
-	// return 1 to break the loop
-	return 0;
-}
-
-void Socket::handleClient(SOCKET clientSocket)
-{
-	if (!AcceptConnection())
-	{
-		closesocket(clientSocket);
-		return;
-	}
-
-	while (true)
-	{
-		if (Listen(clientSocket))
-		{
-			break;
-
-		}
-	}
-	closesocket(clientSocket);
-
-}
-
-int Socket::AcceptConnection()
-{
-	// Logic to accept connection
-	return 1;
-}
-
 void Socket::HandleServerSocket()
 {
+	if (m_Type == UDP) {
+		while (true) {
+			Listen(m_Socket);
+		}
+	}
+
 	while (!m_StopListen)
 	{
 		sockaddr_in addr;
@@ -109,29 +67,82 @@ void Socket::HandleServerSocket()
 	}
 }
 
-int Socket::Create(internetProtocol iprotocol, int protocol, socketType type, int port, communicationType ctype, char* ip, int tls)
+void Socket::handleClient(SOCKET clientSocket)
 {
+	if (!AcceptConnection())
+	{
+		closesocket(clientSocket);
+		return;
+	}
+
+	while (true)
+	{
+		if (Listen(clientSocket))
+		{
+			break;
+
+		}
+	}
+	closesocket(clientSocket);
+
+}
+
+int Socket::Listen(SOCKET clientSocket)
+{
+	// Default implementation prints the received packet
+	char* result = ReceivePacket(clientSocket);
+	if (result == nullptr)
+	{
+		return 0;
+	}
+	else if (result == "Con Closed")
+	{
+		SERVERCMD("Connection closed");
+		return 1;
+	}
+
+	SERVERCMD(result);
+
+	delete result;
+
+	// return 1 to break the loop
+	return 0;
+}
+
+int Socket::AcceptConnection()
+{
+	// Logic to accept connection
+	return 1;
+}
+
+int Socket::Create(internetProtocol iprotocol, socketType type, communicationType ctype, int port, char* ip, int SSLEncryption) 
+{
+	int protocol = (type == UDP) ? IPPROTO_UDP : IPPROTO_TCP;
+
+
 	m_CommunicationType = ctype;
 	m_Type = type;
 	m_Socket = socket(iprotocol, type, protocol);
+
 	if (m_Socket == INVALID_SOCKET)
 	{
 		std::cerr << "Error at socket(): " << WSAGetLastError() << std::endl;
 		WSACleanup();
 		return 1;
 	}
-	if (tls) {
+	if (SSLEncryption && ctype != UDP) {
 		if (EncryptSocket()) {
 			CLIENTCMD("Failed to encrypt socket");
 			return 1;
 		}
 	}
-	sockaddr_in service;
-	service.sin_family = AF_INET;
+	sockaddr_in service{};
+	service.sin_family = iprotocol;
 	service.sin_addr.s_addr = inet_addr(ip);
 	service.sin_port = htons(port);
 
-	if (type == UDP || ctype == SERVER)
+	if (type == UDP && ctype == CLIENT) return 0;
+	if (ctype == SERVER)
 	{
 		if (bind(m_Socket, (SOCKADDR*)&service, sizeof(service)) == SOCKET_ERROR)
 		{
@@ -140,6 +151,7 @@ int Socket::Create(internetProtocol iprotocol, int protocol, socketType type, in
 			return 1;
 		}
 
+		if (type == UDP) return 0;
 
 		if (listen(m_Socket, 1) == SOCKET_ERROR)
 		{
@@ -160,7 +172,7 @@ int Socket::Create(internetProtocol iprotocol, int protocol, socketType type, in
 			return 1;
 		}
 
-		if (tls) {
+		if (SSLEncryption) {
 			BIO* sbio = BIO_new_socket(m_Socket, BIO_NOCLOSE);
 			SSL_set_bio(m_ssl, sbio, sbio);
 
@@ -175,23 +187,17 @@ int Socket::Create(internetProtocol iprotocol, int protocol, socketType type, in
 	return 0;
 }
 
-int Socket::EncryptSocket()
+int Socket::SendPacket(char* packet, SOCKET dest, SOCKADDR* destaddr)
 {
 
-	if (CreateSSLContext()) {
-		return 1;
+	if (m_Type = UDP) {
+		if (!destaddr) {
+			std::cerr << "No destination address" << std::endl;
+			return 1;
+		}
+		return SendUDP(packet, destaddr);
 	}
 
-	m_ssl = SSL_new(m_sslctx);
-	if (!m_ssl) {
-		return 1;
-	}
-
-	return 0;
-}
-
-int Socket::SendPacket(char* packet, SOCKET dest)
-{
 	if (!dest) dest = m_Socket;
 	if (m_ssl) return SendSSL(packet, dest);
 	else return Send(packet, dest);
@@ -200,6 +206,7 @@ int Socket::SendPacket(char* packet, SOCKET dest)
 char* Socket::ReceivePacket(SOCKET source)
 {
 	if (!source) source = m_Socket;
+	if(m_Type == UDP) return ReceiveUDP(source);
 	if (m_ssl) return ReceiveSSL(source);
 	else return Receive(source);
 }
@@ -207,8 +214,6 @@ char* Socket::ReceivePacket(SOCKET source)
 // Send and receive functions
 int Socket::Send(char* packet, SOCKET dest)
 {
-	if (!dest) dest = m_Socket;
-
 	size_t size = strlen(packet);
 	std::string stringSize = std::to_string(size + 1);
 
@@ -242,8 +247,6 @@ int Socket::Send(char* packet, SOCKET dest)
 }
 
 int Socket::SendSSL(char* packet, SOCKET dest) {
-	if (!dest) dest = m_Socket;
-
 	size_t size = strlen(packet);
 	std::string stringSize = std::to_string(size + 1);
 
@@ -262,6 +265,39 @@ int Socket::SendSSL(char* packet, SOCKET dest) {
 	}
 
 	result = SSL_write(m_ssl, packet, size + 1);
+	if (result == SOCKET_ERROR)
+	{
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return 2;
+		}
+		std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
+		return 1;
+	}
+
+	return 0;
+}
+
+int Socket::SendUDP(char* packet, SOCKADDR* destaddr)
+{
+	size_t size = strlen(packet);
+	std::string stringSize = std::to_string(size + 1);
+	int result;
+
+	result = sendto(m_Socket, stringSize.c_str(), 64, 0, destaddr, sizeof(sockaddr_in));
+	if (result == SOCKET_ERROR)
+	{
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return 2;
+		}
+		std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
+		return 1;
+	}
+
+	result = sendto(m_Socket, packet, size + 1, 0, destaddr, sizeof(sockaddr_in));
 	if (result == SOCKET_ERROR)
 	{
 		if (result == -1)
@@ -368,12 +404,75 @@ char* Socket::ReceiveSSL(SOCKET source) {
 	return packet;
 }
 
+char* Socket::ReceiveUDP(SOCKET source) {
+	size_t size = 65536;
+	char* stringSize = (char*)malloc(64);
+	int result;
+
+	sockaddr_in client{};
+	int clientSize = sizeof(client);
+	if (stringSize == nullptr) {
+		std::cerr << "Failed to allocate memory" << std::endl;
+		return nullptr;
+	}
+
+	result = recvfrom(source, (char*)stringSize, 64, 0, (sockaddr*)&client, &clientSize);
+	if (result == SOCKET_ERROR)
+	{
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return "Con Closed";
+		}
+		std::cerr << "recv size failed: " << WSAGetLastError() << std::endl;
+		return nullptr;
+	}
+	size = atoi(stringSize);
+	char* packet = new char[size];
+
+	result = recvfrom(source, packet, size, 0, (sockaddr*)&client, &clientSize);
+	if (result == SOCKET_ERROR)
+	{
+		if (result == -1)
+		{
+			std::cerr << "Connection closed." << std::endl;
+			return "Con Closed";
+		}
+		std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
+		return nullptr;
+	}
+
+	// Free memory
+	free(stringSize);
+
+	if (packet[0] == -3) {
+		std::cerr << "Connection closed." << std::endl;
+		return "Con Closed";
+	}
+	return packet;
+}
+
 // SSL functions
+int Socket::EncryptSocket()
+{
+
+	if (CreateSSLContext()) {
+		return 1;
+	}
+
+	m_ssl = SSL_new(m_sslctx);
+	if (!m_ssl) {
+		return 1;
+	}
+
+	return 0;
+}
+
 int Socket::CreateSSLContext()
 {
 	const SSL_METHOD* method;
-	if (m_CommunicationType == CLIENT) method = TLSv1_2_client_method();
-	else method = TLSv1_2_server_method();
+	if (m_CommunicationType == CLIENT) method = TLS_client_method();
+	else method = TLS_server_method();
 
 	m_sslctx = SSL_CTX_new(method);
 	if (!m_sslctx) {
