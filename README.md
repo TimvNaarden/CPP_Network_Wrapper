@@ -7,11 +7,6 @@ You can find a very basic implementation inside the example.c file
 
 Feel free to use the code, anywhere you'd like. Altough some credit would be nice.
 
-# Notes 
-## Testing & UDP
-The code is currently not testing and there are still a few bucks.
-UDP is currently untested and will not work 
-
 ## OpenSSL
 You need to create your own SSL certificates inside the folder OpenSSL
 This can be done like so:
