@@ -40,31 +40,17 @@ project "Networking"
 
     files
     {
-        "socket/**.h",
-        "socket/**.cpp",
-        "main.cpp"
+        "Socket/**.h",
+        "Socket/**.cpp",
+        "main.cpp",
     }
 
     includedirs
     {
         "Socket",
-        "libs",
-        "C:/MinGW/openssl/include",
-
-
     }
+  
 
-    libdirs
-	{
-		"C:/MinGW/openssl/lib",
-        "libs/OpenSSL"
-
-	}
-
-    links
-    {
-
-    }
 
     filter "system:windows"
         systemversion "latest"
@@ -73,6 +59,16 @@ project "Networking"
         {
             "PLATFORM_WINDOWS"
         }
+        libdirs
+	    {
+		        "C:/MinGW/openssl/lib", 
+                "libs/openssl",
+        }   
+        includedirs
+        {
+            "C:/MinGW/openssl/include",
+            "libs"
+        }
     
     filter "system:linux"
         systemversion "latest"
@@ -80,6 +76,12 @@ project "Networking"
         defines
         {   
             "PLATFORM_LINUX"
+        }
+
+        links
+        {
+            "ssl",
+            "crypto"
         }
 
     filter "configurations:Debug"

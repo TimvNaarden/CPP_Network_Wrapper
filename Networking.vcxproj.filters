@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="socket">
-      <UniqueIdentifier>{2E03311C-1AA5-5BF2-0360-6F46EFA0E242}</UniqueIdentifier>
+    <Filter Include="Socket">
+      <UniqueIdentifier>{0EEF8BD1-FA90-B6A7-E34B-CAFBCF8C3DF8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="socket\Socket.h">
-      <Filter>socket</Filter>
+    <ClInclude Include="Socket\Socket.h">
+      <Filter>Socket</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="socket\Socket.cpp">
-      <Filter>socket</Filter>
+    <ClCompile Include="Socket\Socket.cpp">
+      <Filter>Socket</Filter>
     </ClCompile>
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
 </Project>

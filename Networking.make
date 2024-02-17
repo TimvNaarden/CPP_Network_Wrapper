@@ -11,32 +11,22 @@ endif
 .PHONY: clean prebuild prelink
 
 ifeq ($(config),debug)
-  ifeq ($(origin CC), default)
-    CC = clang
-  endif
-  ifeq ($(origin CXX), default)
-    CXX = clang++
-  endif
-  ifeq ($(origin AR), default)
-    AR = ar
-  endif
-  TARGETDIR = bin/Debug-windows-x86_64/Networking
-  TARGET = $(TARGETDIR)/Networking.exe
-  OBJDIR = bin-int/Debug-windows-x86_64/Networking
-  DEFINES += -DPLATFORM_WINDOWS -DDEBUG
-  INCLUDES += -ISocket -Ilibs -IC:/MinGW/openssl/include
+  RESCOMP = windres
+  TARGETDIR = bin/Debug-linux-x86_64/Networking
+  TARGET = $(TARGETDIR)/Networking
+  OBJDIR = bin-int/Debug-linux-x86_64/Networking
+  DEFINES += -DPLATFORM_LINUX -DDEBUG
+  INCLUDES += -ISocket
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS +=
+  LIBS += -lssl -lcrypto
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -LC:/MinGW/openssl/lib -Llibs/OpenSSL -L/usr/lib64 -m64
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
-	@echo Running prebuild commands
-	C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat
   endef
   define PRELINKCMDS
   endef
@@ -48,32 +38,22 @@ all: prebuild prelink $(TARGET)
 endif
 
 ifeq ($(config),release)
-  ifeq ($(origin CC), default)
-    CC = clang
-  endif
-  ifeq ($(origin CXX), default)
-    CXX = clang++
-  endif
-  ifeq ($(origin AR), default)
-    AR = ar
-  endif
-  TARGETDIR = bin/Release-windows-x86_64/Networking
-  TARGET = $(TARGETDIR)/Networking.exe
-  OBJDIR = bin-int/Release-windows-x86_64/Networking
-  DEFINES += -DPLATFORM_WINDOWS -DRELEASE
-  INCLUDES += -ISocket -Ilibs -IC:/MinGW/openssl/include
+  RESCOMP = windres
+  TARGETDIR = bin/Release-linux-x86_64/Networking
+  TARGET = $(TARGETDIR)/Networking
+  OBJDIR = bin-int/Release-linux-x86_64/Networking
+  DEFINES += -DPLATFORM_LINUX -DRELEASE
+  INCLUDES += -ISocket
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS +=
+  LIBS += -lssl -lcrypto
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -LC:/MinGW/openssl/lib -Llibs/OpenSSL -L/usr/lib64 -m64
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
-	@echo Running prebuild commands
-	C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat
   endef
   define PRELINKCMDS
   endef
@@ -85,32 +65,22 @@ all: prebuild prelink $(TARGET)
 endif
 
 ifeq ($(config),dist)
-  ifeq ($(origin CC), default)
-    CC = clang
-  endif
-  ifeq ($(origin CXX), default)
-    CXX = clang++
-  endif
-  ifeq ($(origin AR), default)
-    AR = ar
-  endif
-  TARGETDIR = bin/Dist-windows-x86_64/Networking
-  TARGET = $(TARGETDIR)/Networking.exe
-  OBJDIR = bin-int/Dist-windows-x86_64/Networking
-  DEFINES += -DPLATFORM_WINDOWS -DDIST
-  INCLUDES += -ISocket -Ilibs -IC:/MinGW/openssl/include
+  RESCOMP = windres
+  TARGETDIR = bin/Dist-linux-x86_64/Networking
+  TARGET = $(TARGETDIR)/Networking
+  OBJDIR = bin-int/Dist-linux-x86_64/Networking
+  DEFINES += -DPLATFORM_LINUX -DDIST
+  INCLUDES += -ISocket
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS +=
+  LIBS += -lssl -lcrypto
   LDDEPS +=
-  ALL_LDFLAGS += $(LDFLAGS) -LC:/MinGW/openssl/lib -Llibs/OpenSSL -L/usr/lib64 -m64
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
-	@echo Running prebuild commands
-	C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat
   endef
   define PRELINKCMDS
   endef
@@ -122,8 +92,8 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
-	$(OBJDIR)/main.o \
 	$(OBJDIR)/Socket.o \
+	$(OBJDIR)/main.o \
 
 RESOURCES := \
 
@@ -182,10 +152,10 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
-$(OBJDIR)/main.o: main.cpp
+$(OBJDIR)/Socket.o: Socket/Socket.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Socket.o: socket/Socket.cpp
+$(OBJDIR)/main.o: main.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 
