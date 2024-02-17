@@ -42,7 +42,6 @@ project "Networking"
     {
         "Socket/**.h",
         "Socket/**.cpp",
-        "main.cpp",
     }
 
     includedirs
