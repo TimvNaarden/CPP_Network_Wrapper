@@ -48,12 +48,12 @@ void Socket::HandleServerSocket() {
         continue;
       }
     }
-    std::thread t1 = std::thread(&Socket::handleClient, this, clientSocket);
+    std::thread t1 = std::thread(&Socket::HandleClient, this, clientSocket);
     t1.detach();
   }
 }
 
-void Socket::handleClient(SOCKET clientSocket) {
+void Socket::HandleClient(SOCKET clientSocket) {
   if (!AcceptConnection()) {
     closesocket(clientSocket);
     return;
@@ -430,25 +430,25 @@ int Socket::CreateSSLContext() {
     return 1;
   }
   if (m_CommunicationType == CLIENT) {
-    if (SSL_CTX_use_certificate_file(m_sslctx, "OpenSSL/client.crt",
+    if (SSL_CTX_use_certificate_file(m_sslctx, "Keys/client.crt",
                                      SSL_FILETYPE_PEM) <= 0) {
       std::cerr << "Could not load cert" << std::endl;
       return 1;
     }
 
-    if (SSL_CTX_use_PrivateKey_file(m_sslctx, "OpenSSL/client.key",
+    if (SSL_CTX_use_PrivateKey_file(m_sslctx, "Keys/client.key",
                                     SSL_FILETYPE_PEM) <= 0) {
       std::cerr << "Could not load key" << std::endl;
       return 1;
     }
   } else if (m_CommunicationType == SERVER) {
-    if (SSL_CTX_use_certificate_file(m_sslctx, "OpenSSL/server.crt",
+    if (SSL_CTX_use_certificate_file(m_sslctx, "Keys/server.crt",
                                      SSL_FILETYPE_PEM) <= 0) {
       std::cerr << "Could not load cert" << std::endl;
       return 1;
     }
 
-    if (SSL_CTX_use_PrivateKey_file(m_sslctx, "OpenSSL/server.key",
+    if (SSL_CTX_use_PrivateKey_file(m_sslctx, "Keys/server.key",
                                     SSL_FILETYPE_PEM) <= 0) {
       std::cerr << "Could not load key" << std::endl;
       return 1;

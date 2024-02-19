@@ -13,8 +13,12 @@
   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {                             \
     std::cerr << "WSAStartup failed.\n";                                       \
     return;                                                                    \
-  }
-
+  }                                                                                     
+#pragma comment (lib, "crypt32");
+#pragma comment(lib, "legacy_stdio_definitions")
+#pragma comment(lib, "libssl")
+#pragma comment(lib, "libcrypto")
+ 
 #endif // PLATFORM_WINDOWS
 
 #ifdef PLATFORM_LINUX
@@ -34,15 +38,16 @@
 #define INVALID_SOCKET 0
 #define SOCKET_ERROR -1
 #define RECVFROM_BUFFER void
+
 #endif // PLATFORM_LINUX
+
 
 #include <future>
 #include <iostream>
 
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#pragma comment(lib, "libssl.lib")
-#pragma comment(lib, "libcrypto.lib")
+#include "Openssl/err.h"
+#include "OpenSSL/ssl.h"
+
 
 // Macro's
 #define SERVERCMD(x) std::cout << "Server: " << x << std::endl;
@@ -76,7 +81,7 @@ public:
   // This function will wait for incoming connections
   // It will be called in a loop until m_stoplisten is set to 1
   // Default implementation will accept incoming clients and call the
-  // handleClient() function in a new thread
+  // HandleClient() function in a new thread
   virtual void HandleServerSocket();
 
   // Optional function to accept connection
@@ -100,24 +105,25 @@ public:
   // Returns the packet if successful
   virtual char *ReceivePacket(SOCKET source = 0);
 
-  // These functions here, are not ment to be changed
-private:
   // Determes what to do with the client socket after accepting connection
   // Calls AcceptConnection() function to check if connection should be
   // intialized Calls listen() function in a loop until it returns 1 to break
   // the loop
-  virtual void handleClient(SOCKET clientSocket);
+  virtual void HandleClient(SOCKET clientSocket);
 
   // After the server socket has an connection with a client socket
   // this function wil run in a loop until it returns 1
   // To break the loop return 1
   virtual int Listen(SOCKET clientSocket);
 
+
   int m_StopListen = 1;
   socketType m_Type;
   SOCKET m_Socket;
   communicationType m_CommunicationType;
 
+  // These functions here, are not ment to be changed
+  // 
   // Send and receive functions
   virtual int Send(char *packet, SOCKET dest);
   virtual int SendUDP(char *packet, SOCKADDR *destaddr);
