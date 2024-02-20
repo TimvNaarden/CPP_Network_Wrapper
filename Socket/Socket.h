@@ -7,14 +7,15 @@
 #define socklen_t int
 #define RECVFROM_BUFFER char
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#define AF_INET6 23
 
 #define STARTWSA()                                                             \
   WSADATA wsaData;                                                             \
   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {                             \
     std::cerr << "WSAStartup failed.\n";                                       \
     return;                                                                    \
-  }                                                                                     
-#pragma comment (lib, "crypt32");
+  }                                                                                    
+#pragma comment (lib, "crypt32")
 #pragma comment(lib, "legacy_stdio_definitions")
 #pragma comment(lib, "libssl")
 #pragma comment(lib, "libcrypto")
@@ -41,6 +42,7 @@
 
 #endif // PLATFORM_LINUX
 
+extern int SSLCounter;
 
 #include <future>
 #include <iostream>

@@ -1,0 +1,11 @@
+﻿  Socket.cpp
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(42,34): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(148,34): warning C4244: 'argument': conversion from 'SOCKET' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(116,29): warning C4996: 'inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(208,36): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(237,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(266,42): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(301,33): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(342,36): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\OneDrive\Coding\C++\Testing\vendor\Networking\Socket\Socket.cpp(387,37): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Networking.vcxproj -> D:\OneDrive\Coding\C++\Testing\vendor\Networking\bin\Debug-windows-x86_64\Networking\Networking.lib

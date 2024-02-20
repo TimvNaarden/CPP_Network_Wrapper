@@ -24,7 +24,7 @@ project "Networking"
 
         defines
         {
-            "PLATFORM_WINDOWS"
+            "PLATFORM_WINDOWS",
         }
     
     filter "system:linux"

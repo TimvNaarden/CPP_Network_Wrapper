@@ -1,4 +1,5 @@
 #include "Socket.h"
+int SSLCounter = 0;
 
 Socket::Socket() {
   // Init vars
@@ -154,6 +155,7 @@ int Socket::Create(internetProtocol iprotocol, socketType type,
       }
     }
   }
+  if (SSLEncryption) SSLCounter++;
   return 0;
 }
 
@@ -460,10 +462,13 @@ int Socket::CreateSSLContext() {
 }
 
 void Socket::CleanupSSL() {
-  SSL_shutdown(m_ssl);
-  SSL_free(m_ssl);
-  SSL_CTX_free(m_sslctx);
+    if (SSLCounter == 1) {
+    SSL_shutdown(m_ssl);
+    SSL_free(m_ssl);
+    SSL_CTX_free(m_sslctx);
 
-  EVP_cleanup();
-  ERR_free_strings();
+    EVP_cleanup();
+    ERR_free_strings();
+    }
+    SSLCounter--;
 }
