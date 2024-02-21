@@ -97,7 +97,7 @@ public:
   // Returns -1 if connection is closed
   // Returns 0 if successful
   // Returns 1 if failed
-  virtual int SendPacket(char *packet, SOCKET dest = 0,
+  virtual int SendPacket(char *packet, size_t size = 0, SOCKET dest = 0,
                          SOCKADDR *destaddr = {});
 
   // Receive a packet
@@ -127,9 +127,9 @@ public:
   // These functions here, are not ment to be changed
   // 
   // Send and receive functions
-  virtual int Send(char *packet, SOCKET dest);
-  virtual int SendUDP(char *packet, SOCKADDR *destaddr);
-  virtual int SendSSL(char *packet, SOCKET dest);
+  virtual int Send(char *packet, SOCKET dest, size_t sizeinput);
+  virtual int SendUDP(char *packet, SOCKADDR *destaddr, size_t sizeinput);
+  virtual int SendSSL(char *packet, SOCKET dest, size_t sizeinput);
 
   virtual char *Receive(SOCKET source);
   virtual char *ReceiveSSL(SOCKET source);

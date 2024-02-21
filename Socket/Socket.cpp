@@ -159,22 +159,22 @@ int Socket::Create(internetProtocol iprotocol, socketType type,
   return 0;
 }
 
-int Socket::SendPacket(char *packet, SOCKET dest, SOCKADDR *destaddr) {
+int Socket::SendPacket(char *packet, size_t size, SOCKET dest, SOCKADDR *destaddr) {
 
   if (m_Type == UDP) {
     if (!destaddr) {
       std::cerr << "No destination address" << std::endl;
       return 1;
     }
-    return SendUDP(packet, destaddr);
+    return SendUDP(packet, destaddr, size);
   }
 
   if (!dest)
     dest = m_Socket;
   if (m_ssl)
-    return SendSSL(packet, dest);
+    return SendSSL(packet, dest, size);
   else
-    return Send(packet, dest);
+    return Send(packet, dest, size);
 }
 
 char *Socket::ReceivePacket(SOCKET source) {
@@ -189,91 +189,115 @@ char *Socket::ReceivePacket(SOCKET source) {
 }
 
 // Send and receive functions
-int Socket::Send(char *packet, SOCKET dest) {
-  size_t size = strlen(packet);
-  std::string stringSize = std::to_string(size + 1);
+int Socket::Send(char *packet, SOCKET dest, size_t sizeinput) {
+    size_t size;
+    if (sizeinput != 0) {
+	    size = sizeinput;
+    }
+    else {
+	    size = strlen(packet);
+    }
+    std::string stringSize = std::to_string(size + 1);
 
-  int result;
+    int result;
 
-  result = send(dest, stringSize.c_str(), 64, 0);
-  if (result == SOCKET_ERROR) {
+    result = send(dest, stringSize.c_str(), 64, 0);
+    if (result == SOCKET_ERROR) {
     if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return -1;
+        std::cerr << "Connection closed." << std::endl;
+        return -1;
     }
     std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
     return 1;
-  }
-
-  result = send(dest, packet, size + 1, 0);
-  if (result == SOCKET_ERROR) {
-    if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return -1;
     }
-    std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
-    return 1;
-  }
+    //Make sure all data is sent
+    for (int i = 0; i < size + 1; i += result) {
+    result = send(dest, packet + i, size + 1 - i, 0);
+    if (result == SOCKET_ERROR) {
+        if (result == -1) {
+	    std::cerr << "Connection closed." << std::endl;
+	    return -1;
+	    }
+	    std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
+	    return 1;
+    }
+    }
 
-  return 0;
+    return 0;
 }
 
-int Socket::SendSSL(char *packet, SOCKET dest) {
-  size_t size = strlen(packet);
-  std::string stringSize = std::to_string(size + 1);
+int Socket::SendSSL(char *packet, SOCKET dest, size_t sizeinput) {
+    size_t size;
+    if (sizeinput != 0) {
+        size = sizeinput;
+    }
+    else {
+        size = strlen(packet);
+    }
+    std::string stringSize = std::to_string(size + 1);
 
-  int result;
+    int result;
 
-  result = SSL_write(m_ssl, stringSize.c_str(), 64);
-  if (result == SOCKET_ERROR) {
+    result = SSL_write(m_ssl, stringSize.c_str(), 64);
+    if (result == SOCKET_ERROR) {
     if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return -1;
+        std::cerr << "Connection closed." << std::endl;
+        return -1;
     }
     std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
     return 1;
-  }
-
-  result = SSL_write(m_ssl, packet, size + 1);
-  if (result == SOCKET_ERROR) {
-    if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return -1;
     }
-    std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
-    return 1;
-  }
+    //Make sure all data is sent
+    for (int i = 0; i < size + 1; i += result) {
+        result = SSL_write(m_ssl, packet + i, size + 1);
+        if (result == SOCKET_ERROR) {
+            if (result == -1) {
+                std::cerr << "Connection closed." << std::endl;
+                return -1;
+            }
+            std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
+            return 1;
+        }
+    }
 
-  return 0;
+    return 0;
 }
 
-int Socket::SendUDP(char *packet, SOCKADDR *destaddr) {
-  size_t size = strlen(packet);
-  std::string stringSize = std::to_string(size + 1);
-  int result;
+int Socket::SendUDP(char *packet, SOCKADDR *destaddr, size_t sizeinput) {
+    size_t size;
+    if (sizeinput != 0) {
+        size = sizeinput;
+    }
+    else {
+        size = strlen(packet);
+    }
+    std::string stringSize = std::to_string(size + 1);
+    int result;
 
-  result = sendto(m_Socket, stringSize.c_str(), 64, 0, destaddr,
-                  sizeof(sockaddr_in));
-  if (result == SOCKET_ERROR) {
+    result = sendto(m_Socket, stringSize.c_str(), 64, 0, destaddr,
+                    sizeof(sockaddr_in));
+    if (result == SOCKET_ERROR) {
     if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return -1;
+        std::cerr << "Connection closed." << std::endl;
+        return -1;
     }
     std::cerr << "send size failed: " << WSAGetLastError() << std::endl;
     return 1;
-  }
-
-  result = sendto(m_Socket, packet, size + 1, 0, destaddr, sizeof(sockaddr_in));
-  if (result == SOCKET_ERROR) {
-    if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return -1;
     }
-    std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
-    return 1;
-  }
+    //Make sure all data is sent
+    for (int i = 0; i < size + 1; i += result) {
+        result = sendto(m_Socket, packet + i, size + 1, 0, destaddr, sizeof(sockaddr_in));
+        if (result == SOCKET_ERROR) {
+            if (result == -1) {
+                std::cerr << "Connection closed." << std::endl;
+                return -1;
+            }
+            std::cerr << "send data failed: " << WSAGetLastError() << std::endl;
+            return 1;
+        }
+    }
 
-  return 0;
+    return 0;
 }
 
 char *Socket::Receive(SOCKET source) {
@@ -298,14 +322,17 @@ char *Socket::Receive(SOCKET source) {
   size = atoi(stringSize);
   char *packet = new char[size];
 
-  result = recv(source, packet, size, 0);
-  if (result == SOCKET_ERROR) {
-    if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return "Con Closed";
-    }
-    std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
-    return nullptr;
+  //Make sure all data is received
+  for (int i = 0; i < size; i += result) {
+	result = recv(source, packet + i, size - i, 0);
+    if (result == SOCKET_ERROR) {
+        if (result == -1) {
+		std::cerr << "Connection closed." << std::endl;
+		return "Con Closed";
+	  }
+	  std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
+	  return nullptr;
+	}
   }
 
   // Free memory
@@ -339,16 +366,18 @@ char *Socket::ReceiveSSL(SOCKET source) {
   size = atoi(stringSize);
   char *packet = (char *)malloc(size);
 
-  result = SSL_read(m_ssl, packet, size);
-  if (result == SOCKET_ERROR) {
-    if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return "Con Closed";
-    }
-    std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
-    return nullptr;
+  //Make sure all data is received
+  for (int i = 0; i < size; i += result) {
+      result = SSL_read(m_ssl, packet + i, size);
+      if (result == SOCKET_ERROR) {
+          if (result == -1) {
+              std::cerr << "Connection closed." << std::endl;
+              return "Con Closed";
+          }
+          std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
+          return nullptr;
+      }
   }
-
   // Free memory
   free(stringSize);
 
@@ -384,16 +413,18 @@ char *Socket::ReceiveUDP(SOCKET source) {
   size = atoi(stringSize);
   char *packet = new char[size];
 
-  result = recvfrom(source, packet, size, 0, (sockaddr *)&client, &clientSize);
-  if (result == SOCKET_ERROR) {
-    if (result == -1) {
-      std::cerr << "Connection closed." << std::endl;
-      return "Con Closed";
-    }
-    std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
-    return nullptr;
+  //Make sure all data is received
+  for (int i = 0; i < size; i += result) {
+      result = recvfrom(source, packet + i, size, 0, (sockaddr*)&client, &clientSize);
+      if (result == SOCKET_ERROR) {
+          if (result == -1) {
+              std::cerr << "Connection closed." << std::endl;
+              return "Con Closed";
+          }
+          std::cerr << "recv data failed: " << WSAGetLastError() << std::endl;
+          return nullptr;
+      }
   }
-
   // Free memory
   free(stringSize);
 

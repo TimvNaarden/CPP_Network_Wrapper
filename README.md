@@ -8,7 +8,8 @@ You can find a very basic implementation inside the example.c file
 Feel free to use the code, anywhere you'd like. Altough some credit would be nice.
 
 ## OpenSSL
-You need to create your own SSL certificates inside the folder OpenSSL
+You need to create your own SSL certificates inside the folder Keys
+The keys are hardcoded with a specific name, 
 This can be done like so:
 
 ### Server:
