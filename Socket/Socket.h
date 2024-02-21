@@ -75,10 +75,10 @@ public:
   virtual int Create(internetProtocol iprotocol, // IPV4 or IPV6
                      socketType type,            // TCP or UDP
                      communicationType ctype,    // Client or Server
-                     int port = 0, // If using TCP or UDP server specify port
-                     char *ip = "127.0.0.1",   // Specify ip for servers to bind
-                                               // or tcp client to connect to
-                     int SSLEncryption = false // Enable SSL encryption
+                     int port = 0,               // Specify port number
+                     char *ip = "127.0.0.1",     // Specify ip for servers to bind
+                                                 // or tcp client to connect to
+                     int SSLEncryption = false   // Enable SSL encryption
   );
 
   // This function will wait for incoming connections
@@ -94,7 +94,7 @@ public:
   virtual int AcceptConnection();
 
   // Send a packet
-  // Do not specify a destination if using TCP client or server
+  // Do not specify a destination if using TCP client
   // Returns -1 if connection is closed
   // Returns 0 if successful
   // Returns 1 if failed
