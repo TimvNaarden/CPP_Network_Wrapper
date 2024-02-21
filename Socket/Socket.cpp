@@ -3,20 +3,24 @@ int SSLCounter = 0;
 int SocketCounter = 0;
 
 Socket::Socket() {
-  SocketCounter++;
-  // Init vars
-  m_StopListen = 0;
-  m_Socket = INVALID_SOCKET;
-  m_Type = TCP;
-  m_sslctx = nullptr;
-  m_ssl = nullptr;
-  m_CommunicationType = SERVER;
-  m_SSLEnabled = 0;
-  STARTWSA();
+    if (SocketCounter == 0) {
+        STARTWSA();
+    }
+      SocketCounter++;
+      // Init vars
+      m_StopListen = 0;
+      m_Socket = INVALID_SOCKET;
+      m_Type = TCP;
+      m_sslctx = nullptr;
+      m_ssl = nullptr;
+      m_CommunicationType = SERVER;
+      m_SSLEnabled = 0;
+  
 }
 
 Socket::~Socket() {
   SocketCounter--;
+  if (SocketCounter == 0) WSACleanup();
   m_StopListen = 1;
 
   if (m_SSLEnabled) {
@@ -24,10 +28,6 @@ Socket::~Socket() {
   }
 
   closesocket(m_Socket);
-  if (m_ssl && m_CommunicationType == CLIENT) {
-      SSL_shutdown(m_ssl);
-  }
-
 }
 
 void Socket::HandleServerSocket() {
