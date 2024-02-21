@@ -43,6 +43,7 @@
 #endif // PLATFORM_LINUX
 
 extern int SSLCounter;
+extern int SocketCounter;
 
 #include <future>
 #include <iostream>
@@ -97,7 +98,7 @@ public:
   // Returns -1 if connection is closed
   // Returns 0 if successful
   // Returns 1 if failed
-  virtual int SendPacket(char *packet, size_t size = 0, SOCKET dest = 0,
+  virtual int SendPacket(char *packet, SSL** pssl = nullptr, size_t size = 0, SOCKET dest = 0,
                          SOCKADDR *destaddr = {});
 
   // Receive a packet
@@ -105,18 +106,18 @@ public:
   // Returns "Con Closed " if connection is closed
   // Returns Nullptr if failed
   // Returns the packet if successful
-  virtual char *ReceivePacket(SOCKET source = 0);
+  virtual char *ReceivePacket(SOCKET source = 0, SSL** pssl = nullptr);
 
   // Determes what to do with the client socket after accepting connection
   // Calls AcceptConnection() function to check if connection should be
   // intialized Calls listen() function in a loop until it returns 1 to break
   // the loop
-  virtual void HandleClient(SOCKET clientSocket);
+  virtual void HandleClient(SOCKET clientSocket, SSL** pssl);
 
   // After the server socket has an connection with a client socket
   // this function wil run in a loop until it returns 1
   // To break the loop return 1
-  virtual int Listen(SOCKET clientSocket);
+  virtual int Listen(SOCKET clientSocket, SSL** pssl);
 
 
   int m_StopListen = 1;
@@ -129,18 +130,19 @@ public:
   // Send and receive functions
   virtual int Send(char *packet, SOCKET dest, size_t sizeinput);
   virtual int SendUDP(char *packet, SOCKADDR *destaddr, size_t sizeinput);
-  virtual int SendSSL(char *packet, SOCKET dest, size_t sizeinput);
+  virtual int SendSSL(char *packet, SSL** pssl, SOCKET dest, size_t sizeinput);
 
   virtual char *Receive(SOCKET source);
-  virtual char *ReceiveSSL(SOCKET source);
+  virtual char *ReceiveSSL(SOCKET source, SSL** pssl);
   virtual char *ReceiveUDP(SOCKET source);
 
   // SSL functions
-  int EncryptSocket();
+  void EncryptSocket(SSL** pssl);
   int CreateSSLContext();
   void CleanupSSL();
 
   // SSL variables
   SSL_CTX *m_sslctx;
   SSL *m_ssl;
+  int m_SSLEnabled;
 };
