@@ -1,3 +1,21 @@
+    architecture "x86_64"
+    startproject "Networking"
+
+    configurations
+    {
+        "Debug",
+        "Release",
+        "Dist"
+    }
+
+    flags
+    {
+        "MultiProcessorCompile"
+    }
+
+-- The output directory based on the configurations
+outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
 project "Networking"
     kind "StaticLib"
     language "C++"
@@ -10,14 +28,9 @@ project "Networking"
 
     files
     {
-        "Socket/**.h",
-        "Socket/**.cpp",		
+        "src/**.h",
+        "src/**.cpp",		
     }
-
-    includedirs
-	{
-        ""
-	}
 
     filter "system:windows"
         systemversion "latest"
@@ -34,8 +47,10 @@ project "Networking"
         {   
             "PLATFORM_LINUX"
         }
-
-
+        links {
+            "ssl",
+            "crypto"
+        }
 
     filter "configurations:Debug"
         defines "DEBUG"
