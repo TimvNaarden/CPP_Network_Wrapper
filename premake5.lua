@@ -1,21 +1,3 @@
-    architecture "x86_64"
-    startproject "Networking"
-
-    configurations
-    {
-        "Debug",
-        "Release",
-        "Dist"
-    }
-
-    flags
-    {
-        "MultiProcessorCompile"
-    }
-
--- The output directory based on the configurations
-outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
-
 project "Networking"
     kind "StaticLib"
     language "C++"
@@ -28,9 +10,13 @@ project "Networking"
 
     files
     {
-        "src/**.h",
-        "src/**.cpp",		
+        "include/**.h",
+        "include/**.cpp",		
     }
+	
+	includedirs {
+		"include"
+	}
 
     filter "system:windows"
         systemversion "latest"

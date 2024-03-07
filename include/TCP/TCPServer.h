@@ -35,6 +35,7 @@
 
 #include "openssl/err.h"
 #include "openssl/ssl.h"
+
 #pragma comment(lib, "libssl")
 #pragma comment(lib, "libcrypto")
 
@@ -72,7 +73,7 @@ namespace Networking {
 		 *
 		 * @return int 0 if successful, -1 if failed
 		 */
-		int Send(SOCKET client, const char*& data, int length = 0, SSL* c_SSL = nullptr) const;
+		int Send(SOCKET client, char*& data, int length = 0, SSL* c_SSL = nullptr) const;
 
 		/**
 		 * @brief Receive data from a client

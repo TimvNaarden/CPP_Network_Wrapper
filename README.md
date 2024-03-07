@@ -7,22 +7,3 @@ You can find a very basic implementation inside the example.c file
 
 Feel free to use the code, anywhere you'd like. Altough some credit would be nice.
 
-## OpenSSL
-You need to create your own SSL certificates inside the folder Keys
-The keys are hardcoded with a specific name, 
-This can be done like so:
-
-### Server:
-> openssl genpkey -algorithm RSA -out server.key
-
-> openssl req -new -key server.key -out server.csr
-
-> openssl x509 -req -in server.csr -signkey server.key -out server.crt
-
-### Client:
-> openssl genpkey -algorithm RSA -out client.key
-
-> openssl req -new -key client.key -out client.csr
-
-> openssl x509 -req -in client.csr -signkey client.key -out client.crt
-
