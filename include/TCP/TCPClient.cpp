@@ -168,7 +168,7 @@ namespace Networking {
 		return 0;
 	}
 
-	int TCPClient::Receive(char* data) {
+	int TCPClient::Receive(char*& data) {
 		char SizePacket[20]; // 64-bit integer can be at most 20 characters long
 
 		if (m_SSL) {
@@ -214,3 +214,4 @@ namespace Networking {
 		return 0;
 	}
 } // namespace Networking
+
