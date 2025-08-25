@@ -1,17 +1,10 @@
 #include "include/TCP/TCPServer.h"
-
-#ifdef __win32
-#include <windows.h>
-#endif
-
-#ifndef __win32
-#include <unistd.h>
-#endif
+#include <thread>
 char Ip[] = "0.0.0.0";
 
 void TCP_Server_Loop(Networking::TCPServer *server, SOCKET sock, SSL *ssl) {
   std::cout << "Client connected" << std::endl;
-  usleep(100000);
+  std::this_thread::sleep_for(2000ms);
   char *Message = (char *)"Hello";
   server->Send(sock, Message);
   std::cout << "Message send" << std::endl;
