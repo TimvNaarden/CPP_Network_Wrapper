@@ -6,6 +6,7 @@ void TCP_Server_Loop(Networking::TCPServer *server, SOCKET sock, SSL *ssl) {
   char *Message = (char *)"Hello\0";
   server->Send(sock, Message, 6);
   std::cout << "Message send" << std::endl;
+  closesocket(sock);
 }
 
 int main() {
