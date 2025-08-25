@@ -1,4 +1,5 @@
 #include "TCPServer.h"
+#include <sys/socket.h>
 
 namespace Networking {
 int g_TCPServerCount = 0;
@@ -66,7 +67,7 @@ TCPServer::~TCPServer() {
 
 int TCPServer::Send(SOCKET client, char *&data, int length, SSL *c_SSL) const {
   size_t size = (length) ? length : strlen(data);
-  std::string SizePacket = std::to_string(size);
+  std::string SizePacket = std::to_string(size) + "\n";
 
   if (m_SSL) {
     int ResultSize = SSL_write(c_SSL, SizePacket.c_str(), SizePacket.size());
@@ -105,12 +106,17 @@ int TCPServer::Send(SOCKET client, char *&data, int length, SSL *c_SSL) const {
 int TCPServer::Receive(SOCKET client, char *&data, SSL *c_SSL) {
   char SizePacket[20]; // 64-bit integer can be at most 20 characters long
   if (c_SSL) {
-    int ResultSize = SSL_read(c_SSL, SizePacket, 19);
-    if (ResultSize <= 0) {
-      std::cerr << "Failed to receive size from client" << std::endl;
-      return -1;
+    for (int pos = 0;; pos++) {
+      int ResultSize = SSL_read(c_SSL, SizePacket + pos, 1);
+      if (ResultSize <= 0) {
+        std::cerr << "Failed to receive size from client" << std::endl;
+        return -1;
+      }
+      if (SizePacket[pos] == '\n') {
+        SizePacket[pos] = '\0';
+        break;
+      }
     }
-    SizePacket[ResultSize] = '\0';
 
     data = new char[std::stoi(SizePacket) + 1];
     int TotalReceived = 0;
@@ -125,12 +131,17 @@ int TCPServer::Receive(SOCKET client, char *&data, SSL *c_SSL) {
     }
     data[TotalReceived] = '\0';
   } else {
-    int ResultSize = recv(client, SizePacket, 19, 0);
-    if (ResultSize == -1) {
-      std::cerr << "Failed to receive size from client" << std::endl;
-      return -1;
+    for (int pos = 0;; pos++) {
+      int ResultSize = recv(client, SizePacket + pos, 1, 0);
+      if (ResultSize <= 0) {
+        std::cerr << "Failed to receive size from client" << std::endl;
+        return -1;
+      }
+      if (SizePacket[pos] == '\n') {
+        SizePacket[pos] = '\0';
+        break;
+      }
     }
-    SizePacket[ResultSize] = '\0';
     data = new char[std::stoi(SizePacket) + 1];
     int TotalReceived = 0;
     while (TotalReceived < std::stoi(SizePacket)) {

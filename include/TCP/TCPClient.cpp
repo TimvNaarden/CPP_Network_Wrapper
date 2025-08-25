@@ -139,7 +139,7 @@ TCPClient::~TCPClient() {
 
 int TCPClient::Send(const char *data, int length) {
   size_t size = (length) ? length : strlen(data);
-  std::string SizePacket = std::to_string(size);
+  std::string SizePacket = std::to_string(size) + "\n";
 
   if (m_SSL) {
     int ResultSize = SSL_write(m_SSL, SizePacket.c_str(), SizePacket.size());
@@ -177,20 +177,24 @@ int TCPClient::Send(const char *data, int length) {
 
 int TCPClient::Receive(char *&data) {
   char SizePacket[20]; // 64-bit integer can be at most 20 characters long
-
   if (m_SSL) {
-    int ResultSize = SSL_read(m_SSL, SizePacket, 19);
-    if (ResultSize <= 0) {
-      std::cerr << "Failed to receive size from server" << std::endl;
-      return -1;
+    for (int pos = 0;; pos++) {
+      int ResultSize = SSL_read(m_SSL, SizePacket + pos, 1);
+      if (ResultSize <= 0) {
+        std::cerr << "Failed to receive size from server" << std::endl;
+        return -1;
+      }
+      if (SizePacket[pos] == '\n') {
+        SizePacket[pos] = '\0';
+        break;
+      }
     }
-    SizePacket[ResultSize] = '\0';
 
     data = new char[std::stoi(SizePacket) + 1];
     int TotalReceived = 0;
     while (TotalReceived < std::stoi(SizePacket)) {
-      int ResultData = SSL_read(m_SSL, (RECVFORM_BUFFER)data + TotalReceived,
-                                std::stoi(SizePacket) - TotalReceived);
+      int ResultData =
+          SSL_read(m_SSL, data + TotalReceived, std::stoi(SizePacket));
       if (ResultData <= 0) {
         std::cerr << "Failed to receive data from server" << std::endl;
         return -1;
@@ -199,17 +203,22 @@ int TCPClient::Receive(char *&data) {
     }
     data[TotalReceived] = '\0';
   } else {
-    int ResultSize = recv(m_Socket, SizePacket, 19, 0);
-    if (ResultSize == -1) {
-      std::cerr << "Failed to receive size from server" << std::endl;
-      return -1;
+    for (int pos = 0;; pos++) {
+      int ResultSize = recv(m_Socket, SizePacket + pos, 1, 0);
+      if (ResultSize <= 0) {
+        std::cerr << "Failed to receive size from server" << std::endl;
+        return -1;
+      }
+      if (SizePacket[pos] == '\n') {
+        SizePacket[pos] = '\0';
+        break;
+      }
     }
-    SizePacket[ResultSize] = '\0';
     data = new char[std::stoi(SizePacket) + 1];
     int TotalReceived = 0;
     while (TotalReceived < std::stoi(SizePacket)) {
-      int ResultData = recv(m_Socket, (RECVFORM_BUFFER)data + TotalReceived,
-                            std::stoi(SizePacket) - TotalReceived, 0);
+      int ResultData =
+          recv(m_Socket, data + TotalReceived, std::stoi(SizePacket), 0);
       if (ResultData == -1) {
         std::cerr << "Failed to receive data from server" << std::endl;
         return -1;
