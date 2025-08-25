@@ -3,7 +3,7 @@ char Ip[] = "0.0.0.0";
 
 void TCP_Server_Loop(Networking::TCPServer *server, SOCKET sock, SSL *ssl) {
   std::cout << "Client connected" << std::endl;
-  char *Message = (char *)"Hello\0";
+  char Message[] = "Hello";
   server->Send(sock, Message, 6);
   std::cout << "Message send" << std::endl;
   closesocket(sock);
