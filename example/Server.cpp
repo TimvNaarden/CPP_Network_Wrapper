@@ -1,10 +1,10 @@
 #include "include/TCP/TCPServer.h"
 
-#ifdef __WINDOWS__
+#ifdef __win32
 #include <windows.h>
 #endif
 
-#ifdef __LINUX__
+#ifdef __linux__
 #include <unistd.h>
 #endif
 char Ip[] = "0.0.0.0";
