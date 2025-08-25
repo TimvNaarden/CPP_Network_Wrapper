@@ -23,3 +23,7 @@ MakeFile
 *.make
 *.Make
 compile_commands.json
+
+Client
+Server
+.fuse*
