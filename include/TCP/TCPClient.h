@@ -62,7 +62,7 @@ public:
    * @param SSL Enable SSL (default 0)
    */
   TCPClient(iProtocol iProt, UINT16 port, char *ip, int SSL = 0);
-  ~TCPClient() {};
+  ~TCPClient();
 
   /**
    * @brief send data to the server
