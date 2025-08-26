@@ -1,6 +1,4 @@
 #include "TCPServer.h"
-#include <asm-generic/socket.h>
-#include <sys/socket.h>
 
 namespace Networking {
 int g_TCPServerCount = 0;
