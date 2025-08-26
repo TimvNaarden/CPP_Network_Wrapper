@@ -1,4 +1,5 @@
 #include "TCPServer.h"
+#include <asm-generic/socket.h>
 #include <sys/socket.h>
 
 namespace Networking {
@@ -27,7 +28,8 @@ TCPServer::TCPServer(iProtocol iProt, UINT16 port, char *ip, int SSL) {
     std::cerr << "Failed to create socket" << std::endl;
     return;
   }
-
+  int optval = 1;
+  setsockopt(m_Socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
   sockaddr_in ServerAddress{};
   ServerAddress.sin_family = iProt;
   ServerAddress.sin_port = htons(port);
