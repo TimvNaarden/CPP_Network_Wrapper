@@ -1,0 +1,169 @@
+<!doctype html>
+<title>C++ Code runner</title>
+
+<script src="/build/libv86.js"></script>
+<script>
+  "use strict";
+
+  window.onload = function () {
+    var emulator = new V86({
+      wasm_path: "/build/v86.wasm",
+      memory_size: 1024 * 1024 * 1024,
+      vga_memory_size: 8 * 1024 * 1024,
+
+      // Uncomment to see what's going on
+      screen_container: document.getElementById("screen_container"),
+
+      bios: {
+        url: "/bios/seabios.bin",
+      },
+      vga_bios: {
+        url: "/bios/vgabios.bin",
+      },
+      filesystem: {
+        baseurl: "/images/alpine-rootfs-flat",
+        basefs: "/images/alpine-fs.json",
+      },
+
+      bzimage_initrd_from_filesystem: true,
+      cmdline:
+        "rw root=host9p rootfstype=9p rootflags=trans=virtio,cache=loose modules=virtio_pci tsc=reliable",
+      initial_state: { url: "/images/alpine-state.bin" },
+      autostart: true,
+    });
+
+    var data = "";
+    var do_output = false;
+
+    emulator.add_listener("serial0-output-byte", function (byte) {
+      var char = String.fromCharCode(byte);
+      if (char !== "\r") {
+        data += char;
+      }
+
+      if (do_output) {
+        document.getElementById("result").textContent += char;
+      }
+    });
+
+    document.getElementById("source").onkeydown = function (e) {
+      if (e.which == 13 && e.ctrlKey) {
+        document.getElementById("run").onclick();
+      }
+    };
+
+    document.getElementById("run").onclick = function () {
+      var code = document.getElementById("source").value;
+
+      if (code === example_code) {
+        emulator.serial0_send("./Client\r\n");
+      } else {
+        emulator.serial0_send(
+          "echo " +
+            bashEscape(code) +
+            " | g++ -xc++ -o /tmp/prog /root/c_network/include/TCP/TCPClient.cpp - -lssl -lcrypto -I/root/c_network/include && /tmp/prog \r\n",
+        );
+      }
+
+      document.getElementById("result").textContent = "";
+      document.getElementById("status").textContent = "Running ...\n";
+      this.disabled = true;
+
+      do_output = true;
+    };
+
+    document.getElementById("source_server").onkeydown = function (e) {
+      if (e.which == 13 && e.ctrlKey) {
+        document.getElementById("run1").onclick();
+      }
+    };
+
+    document.getElementById("run1").onclick = function () {
+      var code = document.getElementById("source_server").value;
+
+      if (code === example_code_server) {
+        emulator.serial0_send("kill -9 $(pidof server)\r\n");
+        emulator.serial0_send("kill -9 $(pidof prog1)\r\n");
+        emulator.serial0_send("./Server &\r\n");
+      } else {
+        emulator.serial0_send("kill -9 $(pidof Server)\r\n");
+        emulator.serial0_send("kill -9 $(pidof prog1)\r\n");
+        emulator.serial0_send(
+          "echo " +
+            bashEscape(code) +
+            " | g++ -xc++ -o /tmp/prog1 /root/c_network/include/TCP/TCPServer.cpp - -lssl -lcrypto -I/root/c_network/include && /tmp/prog1 &\r\n",
+        );
+      }
+
+      document.getElementById("result").textContent = "";
+      document.getElementById("status").textContent = "Running ...\n";
+      this.disabled = true;
+
+      do_output = true;
+    };
+
+    // https://gist.github.com/creationix/2502704
+    // Implement bash string escaping.
+    function bashEscape(arg) {
+      arg = arg.replace(/\t+/g, "");
+      return (
+        "'" +
+        arg.replace(/'+/g, function (val) {
+          return "'" + val.replace(/'/g, "\\'") + "'";
+        }) +
+        "'"
+      );
+    }
+  };
+  var example_code = `#include "TCP/TCPClient.h"
+char Ip[] = "127.0.0.1";
+
+int main() {
+  Networking::TCPClient MyClient(Networking::IPV4, 7864, Ip, 0);
+  char *Message;
+  int res = MyClient.Receive(Message);
+
+  std::cout << Message << "\\r\\n";
+  return 0;
+}`;
+
+  var example_code_server = `#include "TCP/TCPServer.h"
+char Ip[] = "0.0.0.0";
+
+void TCP_Server_Loop(Networking::TCPServer *server, SOCKET sock, SSL *ssl) {
+  std::cout << "Client connected" << std::endl;
+  char *Message = "Hello";
+  server->Send(sock, Message);
+  std::cout << "Message send" << std::endl;
+  closesocket(sock);
+}
+
+int main() {
+  Networking::TCPServer MyServer(Networking::IPV4, 7865, Ip, 0);
+  MyServer.StartListening(TCP_Server_Loop);
+  return 0;
+}`;
+</script>
+
+<textarea id="source" rows="20" cols="80"></textarea>
+<button id="run">run (ctrl-enter)</button>
+<textarea id="source_server" rows="20" cols="80"></textarea>
+<button id="run1">run (ctrl-enter)</button>
+<br />
+<hr />
+<pre id="status">Ready </pre>
+<pre id="result"></pre>
+
+<hr />
+
+<button id="run1">run (ctrl-enter)</button>
+<hr />
+<div id="screen_container">
+  <div style="white-space: pre; font: 14px monospace; line-height: 14px"></div>
+  <canvas style="display: none"></canvas>
+</div>
+
+<script>
+  document.getElementById("source").value = example_code;
+  document.getElementById("source_server").value = example_code_server;
+</script>

@@ -1,0 +1,11 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[remote "origin"]
+	url = https://github.com/TimvNaarden/CPP_Network_Wrapper.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "2.0"]
+	remote = origin
+	merge = refs/heads/2.0
