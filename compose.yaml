@@ -1,8 +1,18 @@
 services:
-  cpp _web:
+  cppweb:
     image: python:latest
     command: sh -c "cd /usr/src/app && python3 -m http.server 2> /dev/null"
-    ports:
-      - 8000:8000
     volumes:
       - .:/usr/src/app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cpp.rule=Host(`cpp.vannaarden.dev`)"
+      - "traefik.http.routers.cpp.entrypoints=websecure"
+      - "traefik.http.routers.cpp.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cpp.loadbalancer.server.port=8000"
+    networks:
+      - frontend
+
+networks:
+  frontend:
+    external: true
